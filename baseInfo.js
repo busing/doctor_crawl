@@ -159,7 +159,7 @@ casper.then(function(){
 	};
 
 	doctorJson=JSON.stringify(doctorObj);
-	this.echo(doctorJson); 
+	this.echo(doctorJson+""); 
 
 });
 

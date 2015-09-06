@@ -1,19 +1,15 @@
 var fs = require('fs');
-var spawn = require('child_process');
+var child_process = require('child_process');
 var hospitoryUrl="http://www.haodf.com/hospital/DE4roiYGYZwX-bc2dcByMhc7g/menzhen.htm";
 // var hospitoyOfDoctorUrl="http://www.haodf.com/hospital/DE4roiYGYZwX-bc2dcByMhc7g/menzhen.htm";
-var docUrls=new Array();
 
+var page=child_process.execSync("casperjs pageOfDoctor.js --url="+hospitoryUrl);
+console.log("获取到医生数量页数："+page);
+for(var i=1;i<=page;i++)
+{
+	getDocUrls(i);
+}
 
-free=spawn.exec("casperjs pageOfDoctor.js --url="+hospitoryUrl);
-free.stdout.on('data',function(data){
-	var page=data;
-	console.log("获取到医生数量页数："+page);
-	for(var i=1;i<=3;i++)
-	{
-		getDocUrls(i);
-	}
-});
 
 
 function getDocUrls(pageNo)
@@ -22,12 +18,12 @@ function getDocUrls(pageNo)
 	var url=hospitoryUrl.substring(0,index)+"_"+pageNo+hospitoryUrl.substring(index);
 	console.log("hospitalUrl："+url);
 	//爬取医院有多少页的医生信息
-	free = spawn.exec('casperjs doctorUrlList.js --url='+url); 
-	free.stdout.on('data',function(data){
-		docUrls=data.split(",");
-		console.log("获取到医生主页的url数量："+docUrls.length);
-		getDoctorInfo(docUrls);
-	});
+	var urlData= child_process.execSync('casperjs doctorUrlList.js --url='+url,{timeout:1000*30}).toString(); 
+	// urlData="http://www.haodf.com/doctor/DE4r08xQdKSLfK1YHTyyMxUNjSNk.htm,http://www.haodf.com/doctor/DE4r08xQdKSLPTLPxtdX6gWDmEzh.htm";
+	console.log("urlData:"+urlData);
+	var docUrls=urlData.split(",");
+	console.log("获取到医生主页的url数量："+docUrls.length);
+	getDoctorInfo(docUrls);
 }
 
 
@@ -35,35 +31,28 @@ function getDoctorInfo(urls)
 {
 	for(i in urls)
 	{
-		var docUrl=docUrls[i];
-		free = spawn.exec('casperjs baseinfo.js --url='+docUrl); 
-		free.stdout.on('data',function(data){
-			console.log(data)
-			log2File(data);
-		});
+		var docUrl=urls[i];
+		var doctorInfo = child_process.execSync('casperjs baseinfo.js --url='+docUrl).toString(); 
+		console.log(doctorInfo)
+		log2File(doctorInfo);
 	}
 }
 
 
 function log2File(data)
 {
+
 	//记录数据到文件
-	fs.exists('data.txt', function(exists){
+	fs.exists('d:\\data.txt', function(exists){
+		console.log("log to file---->"+exists)
 		if(!exists)
 		{
-			fs.writeFile('data.txt',data,function(err){});
+			fs.writeFile('d:\\data.txt',data,function(err){});
 		}
 		else
 		{
-			fs.appendFile('data.txt',data);
+			fs.appendFile('d:\\data.txt',data);
 		}
 	   
 	});
 }
-
-
-
-// 注册子进程关闭事件 
-free.on('exit', function (code, signal) { 
-	console.log('child process eixt ,exit:' + code); 
-});
