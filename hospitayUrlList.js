@@ -1,3 +1,6 @@
+/**
+ * 采集省地市所有的医院主页url
+ */
 var util=require("./util.js");
 var system = require('system');
 var casper=require('casper').create({
@@ -9,10 +12,12 @@ var casper=require('casper').create({
 });
 
 var url = casper.cli.get("url");
-var url ="http://www.haodf.com/yiyuan/jiangsu/list.htm";
+//url ="http://www.haodf.com/yiyuan/jiangsu/list.htm";
 
+//医院urlList
 var hospitoyUrlList;
 
+//获取医院url
 function getUrlOfHospitoy()
 {
 	var urlList=new Array();

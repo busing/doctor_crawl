@@ -1,3 +1,6 @@
+/**
+ * 从医院的主页面采集当前页面的所有的医生信息url
+ */
 var util=require("./util.js");
 var system = require('system');
 var casper=require('casper').create({
@@ -8,10 +11,11 @@ var casper=require('casper').create({
    	 }
 });
 var url = casper.cli.get("url");
-// var url ="http://www.haodf.com/hospital/DE4roiYGYZwX-bc2dcByMhc7g/menzhen_1.htm";
 
+//医生url
 var doctorUrlList;
 
+//获取所有的医生信息url
 function getUrlOfDoctor()
 {
 	var urlList=new Array();

@@ -1,3 +1,6 @@
+/**
+ * 采集医院有多少页的医生信息
+ */
 var util=require("./util.js");
 var system = require('system');
 var casper=require('casper').create({
@@ -7,22 +10,16 @@ var casper=require('casper').create({
    	 	loadImages: false
    	 }
 });
-var url = casper.cli.get("url");
 
+var url = casper.cli.get("url");
+//医院的医生信息页数
 var pageOfDoctor=0;
+//医院名称
 var hospitoyName="";
+//医院id
 var hospitalId="";
 
-var casper=require('casper').create({
-	 verbose: false, 
-   	 logLevel: 'debug',
-   	 pageSettings:{
-   	 	loadImages: false
-   	 }
-});
-
-
-
+//获取医生分页数
 function getPageOfDoctor()
 {
 	var s= $(".p_bar").find(".p_text").eq(0).html();
@@ -30,15 +27,13 @@ function getPageOfDoctor()
 	return pageArray[1];
 }
 
+//获取医院名称
 function getHospitoyName()
 {
 	return $("#headpA_blue").find("a").eq(0).html();
-	// var href= $("#headpA_blue").find("a").eq(0).attr("href");
-	// href=href.substring(href.lastIndexOf("/")+1,href.lastIndexOf("."));
-	// return href;
 }
 
-
+//获取医院的id
 function getHospitoyId()
 {
 	var href= $("#headpA_blue").find("a").eq(0).attr("href");

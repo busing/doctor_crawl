@@ -1,7 +1,11 @@
+/**
+ * 采集医生基本信息
+ * 包括：姓名、医院、科室、职称、擅长、简介、得票
+ * @type {[type]}
+ */
 var system = require('system');
 var util=require("./util.js");
 var jq=require("./json2.js");
-var url = system.args[1];
 var casper = require('casper').create({
 	 verbose: false, 
    	 logLevel: 'debug',
@@ -10,9 +14,10 @@ var casper = require('casper').create({
    	 }
 });
 
-// var url="http://www.haodf.com/doctor/DE4r08xQdKSLfiboENv5LwmK7DLi.htm";
 var url = casper.cli.get("url");
+//医生对象数据
 var doctorObj={};
+//医生json数据
 var doctorJson;
 //姓名
 var name;
@@ -29,12 +34,13 @@ var intro;
 //得票
 var ticket;
 
-
+//准备采集 去除头像表格
 function pre()
 {
 	$(".ys_tx").parent().parent().remove();
 }
 
+//获取医生姓名
 function getName()
 {
 	//return $.trim($(".doc_name").html());
@@ -42,6 +48,7 @@ function getName()
 	return name;
 }
 
+//获取医院信息
 function getHospitoy()
 {
 	//return $.trim($(".mr_line1 .clearfix").eq(0).find(".hh a").html());
@@ -49,6 +56,7 @@ function getHospitoy()
 	return hospitoy;
 }
 
+//获取科室信息
 function getDepartMent()
 {
 	//return $.trim($(".mr_line1 .clearfix").eq(0).find(".hh a").html());
@@ -56,12 +64,7 @@ function getDepartMent()
 	return department;
 }
 
-function getStartTr()
-{
-	var startTr=0;
-	return $(".ys_tx").length>0?1:0;
-}
-
+//获取职称信息
 function getQualifications()
 {
 	//return $.trim($(".mr_line1 .clearfix").eq(0).find(".hh a").html());
@@ -69,6 +72,7 @@ function getQualifications()
 	return qualifications;
 }
 
+//获取擅长信息
 function getGoodAt()
 {
 	//return $.trim($(".mr_line1 .clearfix").eq(1).find(".hh").html());
@@ -77,6 +81,7 @@ function getGoodAt()
 	return goodat.trim();
 }
 
+//获取描述
 function getIntro()
 {
 	//return $("#js_passportUserNameList").html();
@@ -93,7 +98,7 @@ function getIntro()
 	return intro.trim();
 }
 
-
+//获取得票信息
 function getTicket()
 {
 	var ticket="";
@@ -114,7 +119,7 @@ function getTicket()
 }
 
 casper.start();
-
+//打开医生信息页面进行采集
 casper.thenOpen(url,function(response){
 
 	this.thenEvaluate(util.injectJQuery);
@@ -139,14 +144,7 @@ casper.thenOpen(url,function(response){
 
 
 casper.then(function(){
-	// this.echo("name："+name); 
-	// this.echo("hospitoy："+hospitoy); 
-	// this.echo("department："+department); 
-	// this.echo("goodat："+goodat);  
-	// this.echo("intro："+intro); 
-	// this.echo("qualifications："+qualifications); 
-	// this.echo("ticket: "+ticket); 
-
+	//构建医生对象
 	var doctorObj={
 		'name':name,
 		'hospitoy':hospitoy,
@@ -157,13 +155,12 @@ casper.then(function(){
 		'ticket':ticket,
 		'url':url
 	};
-
+	//json数据
 	doctorJson=JSON.stringify(doctorObj);
 	this.echo(doctorJson+""); 
-
 });
 
-
+//退出采集
 casper.run(function(){
 	this.exit();
 });

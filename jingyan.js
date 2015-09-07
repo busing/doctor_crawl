@@ -1,3 +1,7 @@
+/**
+ * 采集医生的看病经验数据（待完善）
+ * @type {[type]}
+ */
 var util=require("./util.js");
 var system = require('system');
 // var url = system.args[1];
