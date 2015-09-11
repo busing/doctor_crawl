@@ -5,15 +5,17 @@ var fs = require('fs');
 var child_process = require('child_process');
 
 //医院列表url
-var hospitayListUrl="http://www.haodf.com/yiyuan/jiangsu/list.htm";
+var hospitayListUrl="http://www.haodf.com/yiyuan/anhui/list.htm";
 //爬虫计数器  记录爬取医生信息的数量
 var crawl_doctor_count=0;
 //采集日志文件目录
-var hospitalUrlLog='logs\\doctor.log';
+var hospitalUrlLog='logs/doctor.log';
 //最后采集的医院url 用于关闭爬虫打开可以增量采集
 var lastHospitalUrl="";
 //最后采集的页数 默认为1
 var lastPageNo=1;
+
+var dir="/home/crawl/doctor_crawl";
 
 //初始化采集的医院的页数
 function initProperty()
@@ -33,6 +35,7 @@ function initProperty()
 //入口方法
 function main()
 {
+	child_process.execSync("cd "+dir);
 	//获取医院url列表
 	var hospitayUrlStr=child_process.execSync("casperjs hospitayUrlList.js --url="+hospitayListUrl).toString();
 	console.log("hospitayUrlStr:"+hospitayUrlStr);
@@ -57,12 +60,12 @@ function main()
 
 		console.log("获取到医生数量页数："+page);
 		//开始遍历分页采集医生url 判断是否有日志分页数据，没有则从1开始
-		for(var i=lastPageNo;i<=page;i++)
+		for(var j=lastPageNo;j<=page;j++)
 		{
 			//采集医生url
-			getDocUrls(hospitayUrl,i,hospitalId);
+			getDocUrls(hospitayUrl,j,hospitalId);
 			//每页的数据采集完毕，记录日志，更新采集进度，以便程序被关闭打开可以继续采集
-			fs.writeFileSync(hospitalUrlLog,hospitayUrl+","+i);
+			fs.writeFileSync(hospitalUrlLog,hospitayUrl+","+j);
 		}
 		lastPageNo=1;
 	}
@@ -92,7 +95,7 @@ function getDoctorInfo(urls,hospitalId)
 	{
 		var docUrl=urls[i];
 		//采集医生信息
-		var doctorInfo = child_process.execSync('casperjs baseinfo.js --url='+docUrl).toString(); 
+		var doctorInfo = child_process.execSync('casperjs baseInfo.js --url='+docUrl).toString(); 
 		//计数器
 		crawl_doctor_count++;
 		console.log("已经爬取医生信息数量："+crawl_doctor_count);
@@ -105,7 +108,7 @@ function getDoctorInfo(urls,hospitalId)
 function logDoctor2File(data,hospitalId)
 {
 	//记录数据到文件
-	var fileName="data\\"+hospitalId+'_doctor.txt';
+	var fileName="data/"+hospitalId+'_doctor.txt';
 	var exists=fs.existsSync(fileName);
 	console.log("write to file "+fileName);
 	if(!exists)
