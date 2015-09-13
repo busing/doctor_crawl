@@ -25,9 +25,9 @@ function initProperty()
 	console.log("logStr:"+logStr);
 	if(logStr!="")
 	{
-		lastHospitalUrl=logStr.split(",")[0];
-		lastPageNo=logStr.split(",")[1];
-		lastUpareaUrl=logStr.split(",")[2];
+		lastUpareaUrl=logStr.split(",")[0];
+		lastHospitalUrl=logStr.split(",")[1];
+		lastPageNo=logStr.split(",")[2];
 		lastPageNo++;
 	}
 	console.log("lastHospitalUrl:"+lastHospitalUrl);
@@ -98,12 +98,19 @@ function getDocUrls(hospitayUrl,pageNo,hospitalId,upareaName)
 	var url=hospitayUrl.substring(0,index)+"_"+pageNo+hospitayUrl.substring(index);
 	console.log("get doctor url from ===========> "+url);
 
-	//采集当前页面所有的医生url
-	var urlData= child_process.execSync('casperjs doctorUrlList.js --url='+url,{timeout:1000*30}).toString(); 
-	var docUrls=urlData.split(",");
-	console.log("获取到医生url数量："+docUrls.length);
-	//采集医生信息
-	getDoctorInfo(docUrls,hospitalId,upareaName);
+	try{
+		//采集当前页面所有的医生url
+		var urlData= child_process.execSync('casperjs doctorUrlList.js --url='+url,{timeout:1000*30}).toString(); 
+		var docUrls=urlData.split(",");
+		console.log("获取到医生url数量："+docUrls.length);
+		//采集医生信息
+		getDoctorInfo(docUrls,hospitalId,upareaName);
+	}
+	catch(e)
+	{
+		console.log("exception in getDocUrls");
+	}
+	
 }
 
 //批量采集医生信息
@@ -111,14 +118,21 @@ function getDoctorInfo(urls,hospitalId,upareaName)
 {
 	for(var i in urls)
 	{
-		var docUrl=urls[i];
-		//采集医生信息
-		var doctorInfo = child_process.execSync('casperjs baseInfo.js --url='+docUrl).toString(); 
-		//计数器
-		crawl_doctor_count++;
-		console.log("已经爬取医生信息数量："+crawl_doctor_count);
-		//将医生信息追加到文件，一个医院一个文件
-		logDoctor2File(doctorInfo,hospitalId,upareaName);
+		var doctorInfo="";
+		try{
+			var docUrl=urls[i];
+			//采集医生信息
+			doctorInfo = child_process.execSync('casperjs baseInfo.js --url='+docUrl).toString(); 
+			//计数器
+			crawl_doctor_count++;
+			console.log("已经爬取医生信息数量："+crawl_doctor_count);
+			//将医生信息追加到文件，一个医院一个文件
+			logDoctor2File(doctorInfo,hospitalId,upareaName);
+		}catch(e)
+		{
+			console.log("exception in getDoctorInfo");
+		}
+		
 	}
 }
 
@@ -126,7 +140,7 @@ function getDoctorInfo(urls,hospitalId,upareaName)
 function logDoctor2File(data,hospitalId,upareaName)
 {
 	//记录数据到文件
-	var fileName="data/"+upareaName+"/"+hospitalId+'_doctor.txt';
+	var fileName="data/"+upareaName+"_"+hospitalId+'_doctor.txt';
 	var exists=fs.existsSync(fileName);
 	console.log("write to file "+fileName);
 	if(!exists)
@@ -168,10 +182,9 @@ function getUpareaName(url)
 {
 	//http://www.haodf.com/yiyuan/beijing/list.htm
 	url=url.replace("/list.htm","");
-	var un=url.substring(url.lastIndexOf("/"));
+	var un=url.substring(url.lastIndexOf("/")+1);
 	return un;
 }
-
 
 //初始化参数
 initProperty();
